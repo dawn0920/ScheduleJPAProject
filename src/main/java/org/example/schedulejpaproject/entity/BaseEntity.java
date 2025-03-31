@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
 
-    @CreatedDate
+    @CreatedDate // 생성시 자동 입력
     @Column(updatable = false) // 해당 필드가 한번 저장된 후에는 수정되지 않음
     private LocalDateTime createdAt;
 
