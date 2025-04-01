@@ -30,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다. = " + id));
         return new UserResponseDto(user.getId(), user.getName(), user.getEmail());
     }
+
+    Optional<User> findByEmail(String email);
 }

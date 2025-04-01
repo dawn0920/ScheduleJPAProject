@@ -1,6 +1,7 @@
 package org.example.schedulejpaproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.schedulejpaproject.config.PasswordEncoder;
 import org.example.schedulejpaproject.dto.LoginResponseDto;
 import org.example.schedulejpaproject.dto.SignUpResponseDto;
 import org.example.schedulejpaproject.dto.UserResponseDto;
@@ -17,10 +18,13 @@ import java.util.Optional;
 @RequiredArgsConstructor // 클래스 내 final 혹은 @NonNull 이 붙은 필드만 포함하는 생성자
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 생성(회원가입)
     public SignUpResponseDto signUp(String name, String email, String password) {
-        User user = new User(name, email, password);
+        String encodingPassword = passwordEncoder.encode(password);
+
+        User user = new User(name, email, encodingPassword);
         User saveUser = userRepository.save(user);
 
         return new SignUpResponseDto(saveUser.getId(), saveUser.getName(), saveUser.getEmail());
@@ -44,11 +48,12 @@ public class UserService {
     public void updatePassword(int id, String oldPassword, String newPassword) {
         User findUser = userRepository.findByIdOrElseThrow(id);
 
-        if (!findUser.getPassword().equals(oldPassword)) {
+        if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
 
-        findUser.updatePassword(newPassword);
+        String encodingNewPassword = passwordEncoder.encode(newPassword);
+        findUser.updatePassword(encodingNewPassword);
     }
 
     public void delete(int id) {
@@ -58,8 +63,13 @@ public class UserService {
     }
 
     public LoginResponseDto login(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일이 존재하지 않습니다."));
+
         // 입력받은 name, password 와 일치하는 database 조회
-        User user = userRepository.findIdByEmailAndPassword(email, password);
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+        }
 
         return new LoginResponseDto(user.getId(), user.getName());
     }
