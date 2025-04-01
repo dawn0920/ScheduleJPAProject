@@ -1,6 +1,7 @@
 package org.example.schedulejpaproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.schedulejpaproject.dto.LoginResponseDto;
 import org.example.schedulejpaproject.dto.SignUpResponseDto;
 import org.example.schedulejpaproject.dto.UserResponseDto;
 import org.example.schedulejpaproject.entity.User;
@@ -35,7 +36,7 @@ public class UserService {
 
         User findUser = optionalUser.get();
 
-        return new UserResponseDto(findUser.getName(), findUser.getEmail());
+        return new UserResponseDto(findUser.getId() , findUser.getName(), findUser.getEmail());
     }
 
     // 수정
@@ -56,6 +57,10 @@ public class UserService {
         userRepository.delete(findUser);
     }
 
+    public LoginResponseDto login(String email, String password) {
+        // 입력받은 name, password 와 일치하는 database 조회
+        User user = userRepository.findIdByEmailAndPassword(email, password);
 
-
+        return new LoginResponseDto(user.getId(), user.getName());
+    }
 }
