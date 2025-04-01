@@ -7,6 +7,7 @@ import org.example.schedulejpaproject.entity.User;
 import org.example.schedulejpaproject.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -36,4 +37,25 @@ public class UserService {
 
         return new UserResponseDto(findUser.getName(), findUser.getEmail());
     }
+
+    // 수정
+    @Transactional
+    public void updatePassword(int id, String oldPassword, String newPassword) {
+        User findUser = userRepository.findByIdOrElseThrow(id);
+
+        if (!findUser.getPassword().equals(oldPassword)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+        }
+
+        findUser.updatePassword(newPassword);
+    }
+
+    public void delete(int id) {
+        User findUser = userRepository.findByIdOrElseThrow(id);
+
+        userRepository.delete(findUser);
+    }
+
+
+
 }
