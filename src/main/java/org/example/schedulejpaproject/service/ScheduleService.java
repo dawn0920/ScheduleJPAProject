@@ -17,11 +17,12 @@ public class ScheduleService {
 
     // 생성
     @Transactional
-    public ScheduleResponseDto save(String title, String contents, String name) {
+    public ScheduleResponseDto save(int userId, String title, String contents, String name) {
 
-        User findUser = userRepository.findUserByNameOrElseThrow(name);
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-        Schedule schedule = new Schedule(title, contents);
+        Schedule schedule = new Schedule(title, contents, name);
         schedule.setUser(findUser);
 
         scheduleRepository.save(schedule);

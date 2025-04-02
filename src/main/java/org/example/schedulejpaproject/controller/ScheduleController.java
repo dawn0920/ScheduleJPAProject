@@ -1,5 +1,7 @@
 package org.example.schedulejpaproject.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.CreateScheduleRequestDto;
 import org.example.schedulejpaproject.dto.ScheduleResponseDto;
@@ -19,10 +21,20 @@ public class ScheduleController {
 
     @PostMapping //생성
     public ResponseEntity<ScheduleResponseDto> save(
-            @RequestBody CreateScheduleRequestDto requestDto
-            ) {
+            @RequestBody CreateScheduleRequestDto requestDto,
+            HttpServletRequest request // 세션 사용을 위해 필요
+    ) {
+        HttpSession session = request.getSession(false);
+
+        if(session == null || session.getAttribute("user") == null) {
+            throw new RuntimeException("로그인이 해주세요.");
+        }
+
+        int userId = (int) session.getAttribute("user");
+
         ScheduleResponseDto scheduleResponseDto =
                 scheduleService.save(
+                        userId,
                         requestDto.getTitle(),
                         requestDto.getContents(),
                         requestDto.getName()
