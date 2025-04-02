@@ -1,7 +1,9 @@
 package org.example.schedulejpaproject.controller;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.*;
@@ -9,6 +11,9 @@ import org.example.schedulejpaproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -57,34 +62,40 @@ public class UserController {
     }
 
     @PostMapping("/login") // 로그인
-    public ResponseEntity<?> login(
+    public  ResponseEntity<Map<String, String>> login(
             @Valid @RequestBody LoginRequestDto requestDto,
-            HttpServletResponse response // 쿠키값 세팅에 필요
+            HttpServletRequest request // 세션 사용을 위해 필요
     ) {
         // 로그인 유저 조회
         LoginResponseDto responseDto = userService.login(
                 requestDto.getEmail(), requestDto.getPassword());
 
-        if (responseDto == null) {
-            return new ResponseEntity<>("이메일 또는 비밀번호가 비어있습니다.", HttpStatus.UNAUTHORIZED);
-        }
+        // 로그인 성공시 세션에 사용자 ID 저장
+        HttpSession session = request.getSession();
+        session.setAttribute("user", responseDto.getId());
 
-        // 로그인 성공시 쿠키에 저장
-        Cookie cookie = new Cookie("userId", String.valueOf(responseDto.getId()));
-        response.addCookie(cookie);
+        // 응답 바디에 메시지 담기
+        Map<String, String> responsBody = new HashMap<>();
+        responsBody.put("message", "로그인 성공");
+        responsBody.put("userId", String.valueOf(responseDto.getId()));
 
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return ResponseEntity.ok(responsBody);
     }
 
     @PostMapping("/logout") // 로그아웃
-    public ResponseEntity<Void> logout(
-            HttpServletResponse response
+    public ResponseEntity<Map<String, String>> logout(
+            HttpServletRequest request
     ) {
-        Cookie cookie = new Cookie("userId", null);
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        HttpSession session = request.getSession(false);
+        if(session != null) {
+            session.invalidate(); // 세션 삭제
+        }
 
-        return ResponseEntity.ok().build();
+        // 응답 바디에 메시지 담기
+        Map<String, String> responsBody = new HashMap<>();
+        responsBody.put("message", "로그아웃 성공");
+
+        return ResponseEntity.ok(responsBody);
     }
 
 }

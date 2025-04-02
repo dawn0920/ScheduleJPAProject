@@ -6,6 +6,7 @@ import org.example.schedulejpaproject.dto.LoginResponseDto;
 import org.example.schedulejpaproject.dto.SignUpResponseDto;
 import org.example.schedulejpaproject.dto.UserResponseDto;
 import org.example.schedulejpaproject.entity.User;
+import org.example.schedulejpaproject.exception.LoginException;
 import org.example.schedulejpaproject.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -64,11 +65,12 @@ public class UserService {
 
     public LoginResponseDto login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new LoginException("이메일이 존재하지 않습니다."));
 
         // 입력받은 name, password 와 일치하는 database 조회
+        // 비밀번호 검증
         if(!passwordEncoder.matches(password, user.getPassword())){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new LoginException("비밀번호가 올바르지 않습니다.");
         }
 
         return new LoginResponseDto(user.getId(), user.getName());
