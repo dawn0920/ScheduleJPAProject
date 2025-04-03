@@ -16,7 +16,17 @@ import java.io.IOException;
 @Slf4j
 public class LoginFilter implements Filter {
     // 인증 없이 접근 가능한 URL 리스트 (화이트리스트)
-    private static final String[] WHITE_LIST = {"/", "/users/signup", "/users/login"};
+    private static final String[] WHITE_LIST = {"/", "/users/signup",
+            "/users/login", "/schedules"};
+
+    public boolean isWhiteList(String requesetUri) {
+        for (String path : WHITE_LIST) {
+            if (requesetUri.startsWith(path)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // 인증을 하지 않아도 될 URL PATH 배열
     @Override
