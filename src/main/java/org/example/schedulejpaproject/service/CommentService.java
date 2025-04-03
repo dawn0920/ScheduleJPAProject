@@ -2,6 +2,7 @@ package org.example.schedulejpaproject.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.CommentResponseDto;
+import org.example.schedulejpaproject.dto.CommentUpdateRequestDto;
 import org.example.schedulejpaproject.dto.ScheduleResponseDto;
 import org.example.schedulejpaproject.entity.Comment;
 import org.example.schedulejpaproject.entity.Schedule;
@@ -33,7 +34,7 @@ public class CommentService {
         Comment comment = new Comment(content, findUser, findSchedule);
         commentRepository.save(comment);
 
-        return new CommentResponseDto(comment.getContent(), comment.getUser().getName(), comment.getModifiedAt());
+        return new CommentResponseDto(comment.getId(), comment.getContent(), comment.getUser().getName(), comment.getModifiedAt());
     }
 
     // 조회
@@ -46,6 +47,31 @@ public class CommentService {
 
 
     // 수정
+    @Transactional
+    public CommentResponseDto updateComment(int scheduleId, int commentId, CommentUpdateRequestDto requestDto) {
+        Schedule findSchedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("일정을 찾을 수 없습니다."));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+
+        comment.update(requestDto.getContent());
+
+        commentRepository.save(comment);
+
+        return new CommentResponseDto(comment);
+    }
 
     // 삭제
+    public void delete(int scheduleId, int commentId) {
+        Schedule findSchedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("일정을 찾을 수 없습니다."));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+
+        Comment findComment = commentRepository.findByIdOrElseThrow(commentId);
+
+        commentRepository.delete(findComment);
+    }
 }
