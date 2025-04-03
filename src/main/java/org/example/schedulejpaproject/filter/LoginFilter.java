@@ -16,17 +16,17 @@ import java.io.IOException;
 @Slf4j
 public class LoginFilter implements Filter {
     // 인증 없이 접근 가능한 URL 리스트 (화이트리스트)
-    private static final String[] WHITE_LIST = {"/", "/users/signup",
-            "/users/login", "/schedules"};
-
-    public boolean isWhiteList(String requesetUri) {
-        for (String path : WHITE_LIST) {
-            if (requesetUri.startsWith(path)) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    private static final String[] WHITE_LIST = {"/", "/users/signup",
+//            "/users/login", "/schedules"};
+//
+//    public boolean isWhiteList(String requesetUri) {
+//        for (String path : WHITE_LIST) {
+//            if (requesetUri.startsWith(path)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     // 인증을 하지 않아도 될 URL PATH 배열
     @Override
@@ -45,7 +45,7 @@ public class LoginFilter implements Filter {
         log.info("로그인 필터 로직 실행");
 
         // 로그인 확인 -> session이 존재 하면 가져옴 없으면 null
-        if (!isWhitList(requestURI)) {
+        if (!isWhiteList(requestURI)) {
             HttpSession session = httpRequest.getSession(false);
 
             // 로그인 하지 않은 사용자의 경우
@@ -63,10 +63,16 @@ public class LoginFilter implements Filter {
     }
 
     // 로그인 여부를 확인하는 URL인지 체크 메서드
-    private boolean isWhitList(String requestURI) {
+    private boolean isWhiteList(String requestURI) {
         // request URI가 whiteListURL에 포함되는지 확인
         // 포함되면 true 반환
         // 포함되지 않으면 false 반환
-        return PatternMatchUtils.simpleMatch(WHITE_LIST, requestURI);
+//        return PatternMatchUtils.simpleMatch(WHITE_LIST, requestURI);
+        return requestURI.matches("^/schedules/\\d+$") ||  // "/schedules/숫자"
+                requestURI.equals("/schedules") ||
+                requestURI.equals("/users/signup") ||
+                requestURI.equals("/users/login");
+        // 코드를 작성하던 중 /schedules/{id} 부분만 로그인 없이 확인 가능하고 댓글을 달 수
+        // 있게 하기 위해 코드를 수정
     }
 }

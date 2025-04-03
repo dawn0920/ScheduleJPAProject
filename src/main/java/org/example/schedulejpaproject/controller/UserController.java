@@ -8,8 +8,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.*;
 import org.example.schedulejpaproject.service.UserService;
+import org.hibernate.engine.jdbc.mutation.spi.BindingGroup;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -18,13 +21,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Validated // 유효성 검사 활성화
 public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup") // 생성 (회원가입)
-    public ResponseEntity<SignUpResponseDto> signUp(
-            @RequestBody SignUpRequestDto requestDto
-            ) {
+    public ResponseEntity<?> signUp(
+            @Valid @RequestBody SignUpRequestDto requestDto
+    ) {
         SignUpResponseDto signUpResponseDto =
                 userService.signUp(
                         requestDto.getName(),
@@ -33,6 +37,30 @@ public class UserController {
                 );
         return new ResponseEntity<>(signUpResponseDto, HttpStatus.CREATED);
     }
+
+//    @PostMapping("/signup")
+//    public ResponseEntity<?> signUp(
+//            @Valid @RequestBody SignUpRequestDto requestDto,
+//            BindingResult bindingResult // 유효성 검사
+//    ) {
+//        if (bindingResult.hasErrors()) { // 유효성 검사 실패 시 로그 출력
+//            bindingResult.getAllErrors().forEach(error -> {
+//                System.out.println("유효성 검사 실패: " + error.getDefaultMessage());
+//            });
+//
+//            Map<String, String> response = new HashMap<>();
+//            response.put("error", bindingResult.getAllErrors().get(0).getDefaultMessage());
+//            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+//        }
+//
+//        SignUpResponseDto signUpResponseDto =
+//                userService.signUp(
+//                        requestDto.getName(),
+//                        requestDto.getEmail(),
+//                        requestDto.getPassword()
+//                );
+//        return new ResponseEntity<>(signUpResponseDto, HttpStatus.CREATED);
+//    }
 
     @GetMapping("/{id}") // 조회
     public ResponseEntity<UserResponseDto> findById(
@@ -46,7 +74,7 @@ public class UserController {
     @PatchMapping("/{id}") // 수정
     public ResponseEntity<Void> updatePassword(
         @PathVariable int id,
-        @RequestBody UpdatePasswordRequestDto requestDto
+        @Valid @RequestBody UpdatePasswordRequestDto requestDto
     ) {
         userService.updatePassword(id, requestDto.getOldPassword(),
                 requestDto.getNewPassword());

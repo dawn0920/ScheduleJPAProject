@@ -2,6 +2,7 @@ package org.example.schedulejpaproject.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.CreateScheduleRequestDto;
 import org.example.schedulejpaproject.dto.ScheduleResponseDto;
@@ -9,6 +10,7 @@ import org.example.schedulejpaproject.dto.ScheduleUpdateRequestDto;
 import org.example.schedulejpaproject.service.ScheduleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,12 +18,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/schedules")
 @RequiredArgsConstructor
+@Validated
 public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping("/create") //생성
     public ResponseEntity<ScheduleResponseDto> save(
-            @RequestBody CreateScheduleRequestDto requestDto,
+            @Valid @RequestBody CreateScheduleRequestDto requestDto,
             HttpServletRequest request // 세션 사용을 위해 필요
     ) {
         HttpSession session = request.getSession(false);
@@ -58,7 +61,7 @@ public class ScheduleController {
         return new ResponseEntity<>(scheduleResponseDto, HttpStatus.OK);
     }
 
-    @PatchMapping("/update/{id}")
+    @PatchMapping("/update/{id}") // 수정
     public ResponseEntity<ScheduleResponseDto> updateSchedule (
             @PathVariable int id,
             @RequestBody ScheduleUpdateRequestDto requestDto
@@ -69,7 +72,7 @@ public class ScheduleController {
         return new ResponseEntity<>(scheduleResponseDto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}") // 삭제
     public ResponseEntity<Void> delete(
             @PathVariable int id
     ) {
