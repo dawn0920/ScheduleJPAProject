@@ -16,4 +16,5 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
         return findById(commentId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다. : " + commentId));
     }
 
+    int countByScheduleId(int id);
 }

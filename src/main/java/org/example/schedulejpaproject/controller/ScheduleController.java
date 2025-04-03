@@ -5,14 +5,19 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.CreateScheduleRequestDto;
+import org.example.schedulejpaproject.dto.PageResponseDto;
 import org.example.schedulejpaproject.dto.ScheduleResponseDto;
 import org.example.schedulejpaproject.dto.ScheduleUpdateRequestDto;
+import org.example.schedulejpaproject.entity.Schedule;
 import org.example.schedulejpaproject.service.ScheduleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RestController
@@ -45,11 +50,20 @@ public class ScheduleController {
         return new ResponseEntity<>(scheduleResponseDto, HttpStatus.CREATED);
     }
 
-    @GetMapping // 조회
-    public ResponseEntity<List<ScheduleResponseDto>> findAll() {
-        List<ScheduleResponseDto> scheduleResponseDtoList = scheduleService.findAll();
+//    @GetMapping // 조회
+//    public ResponseEntity<List<ScheduleResponseDto>> findAll() {
+//        List<ScheduleResponseDto> scheduleResponseDtoList = scheduleService.findAll();
+//
+//        return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
+//    }
 
-        return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
+    @GetMapping // 조회
+    public ResponseEntity<Page<PageResponseDto>> findAll(
+            @PageableDefault(size = 10, sort = "modifiedAt") Pageable pageable
+    ) {
+
+        Page<PageResponseDto> schedules = scheduleService.getSchedule(pageable);
+        return ResponseEntity.ok(schedules);
     }
 
     @GetMapping("/{id}") // 단건 조회

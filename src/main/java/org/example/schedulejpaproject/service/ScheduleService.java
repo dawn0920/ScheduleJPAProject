@@ -1,12 +1,16 @@
 package org.example.schedulejpaproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.schedulejpaproject.dto.PageResponseDto;
 import org.example.schedulejpaproject.dto.ScheduleResponseDto;
 import org.example.schedulejpaproject.dto.ScheduleUpdateRequestDto;
 import org.example.schedulejpaproject.entity.Schedule;
 import org.example.schedulejpaproject.entity.User;
+import org.example.schedulejpaproject.repository.CommentRepository;
 import org.example.schedulejpaproject.repository.ScheduleRepository;
 import org.example.schedulejpaproject.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +21,7 @@ import java.util.List;
 public class ScheduleService {
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
+    private final CommentRepository commentRepository;
 
     // 생성
     @Transactional
@@ -63,5 +68,14 @@ public class ScheduleService {
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
 
         scheduleRepository.delete(findSchedule);
+    }
+
+    public Page<PageResponseDto> getSchedule(Pageable pageable){
+        Page<Schedule> schedules = scheduleRepository.findAll(pageable);
+
+        return schedules.map(schedule -> {
+            int commentCount = commentRepository.countByScheduleId(schedule.getId());
+            return new PageResponseDto(schedule, commentCount);
+        });
     }
 }
