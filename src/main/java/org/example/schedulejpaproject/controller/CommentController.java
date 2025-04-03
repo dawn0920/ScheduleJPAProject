@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/schedules")
 @RequiredArgsConstructor
@@ -45,6 +47,15 @@ public class CommentController {
                         requestDto.getContent()
                 );
         return new ResponseEntity<>(commentResponseDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/comment/{scheduleId}")
+    public ResponseEntity<List<CommentResponseDto>> findAll(
+            @PathVariable int scheduleId
+    ) {
+        List<CommentResponseDto> commentResponseDtoList = commentService.findAllByScheduleId(scheduleId);
+
+        return new ResponseEntity<>(commentResponseDtoList, HttpStatus.OK);
     }
 
 

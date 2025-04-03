@@ -71,7 +71,8 @@ public class LoginFilter implements Filter {
         return requestURI.matches("^/schedules/\\d+$") ||  // "/schedules/숫자"
                 requestURI.equals("/schedules") ||
                 requestURI.equals("/users/signup") ||
-                requestURI.equals("/users/login");
+                requestURI.equals("/users/login") ||
+                requestURI.matches("^/schedules/comment/\\d+$");
         // 코드를 작성하던 중 /schedules/{id} 부분만 로그인 없이 확인 가능하고 댓글을 달 수
         // 있게 하기 위해 코드를 수정
     }

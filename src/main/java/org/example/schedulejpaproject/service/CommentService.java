@@ -2,6 +2,7 @@ package org.example.schedulejpaproject.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.schedulejpaproject.dto.CommentResponseDto;
+import org.example.schedulejpaproject.dto.ScheduleResponseDto;
 import org.example.schedulejpaproject.entity.Comment;
 import org.example.schedulejpaproject.entity.Schedule;
 import org.example.schedulejpaproject.entity.User;
@@ -10,6 +11,8 @@ import org.example.schedulejpaproject.repository.ScheduleRepository;
 import org.example.schedulejpaproject.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +33,17 @@ public class CommentService {
         Comment comment = new Comment(content, findUser, findSchedule);
         commentRepository.save(comment);
 
-        return new CommentResponseDto(comment.getId(), comment.getContent(), comment.getUser().getName(), comment.getModifiedAt());
+        return new CommentResponseDto(comment.getContent(), comment.getUser().getName(), comment.getModifiedAt());
     }
 
     // 조회
+    public List<CommentResponseDto> findAllByScheduleId(int scheduleId) { // ✅ 반환 타입 수정
+        return commentRepository.findByScheduleId(scheduleId)
+                .stream()
+                .map(CommentResponseDto::toDto)
+                .toList();
+    }
+
 
     // 수정
 
